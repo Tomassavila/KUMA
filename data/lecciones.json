@@ -1,0 +1,45 @@
+{
+  "aviso": "DATOS DE PRUEBA: los títulos son de demostración. El contenido real de LSC debe ser validado con personas sordas o intérpretes antes de publicarse.",
+  "lecciones": [
+    {
+      "id": 1,
+      "titulo": "Alfabeto",
+      "descripcion": "Lección de prueba para ver cómo se muestra una lección.",
+      "icono": "abc",
+      "estado": "disponible",
+      "progreso": 3,
+      "totalActividades": 10,
+      "esDemo": true
+    },
+    {
+      "id": 2,
+      "titulo": "Saludos",
+      "descripcion": "Lección de prueba con progreso en cero.",
+      "icono": "chat",
+      "estado": "disponible",
+      "progreso": 0,
+      "totalActividades": 8,
+      "esDemo": true
+    },
+    {
+      "id": 3,
+      "titulo": "Palabras básicas",
+      "descripcion": "Lección de prueba que aparece bloqueada.",
+      "icono": "hand",
+      "estado": "bloqueada",
+      "progreso": 0,
+      "totalActividades": 12,
+      "esDemo": true
+    },
+    {
+      "id": 4,
+      "titulo": "Familia",
+      "descripcion": "Lección de prueba que aparece bloqueada.",
+      "icono": "people",
+      "estado": "bloqueada",
+      "progreso": 0,
+      "totalActividades": 10,
+      "esDemo": true
+    }
+  ]
+}
