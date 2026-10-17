@@ -4,12 +4,12 @@
     {
       "id": 1,
       "titulo": "Alfabeto",
-      "descripcion": "Lección de prueba para ver cómo se muestra una lección.",
+      "descripcion": "Aprende las letras con tus manos en 10 lecciones.",
       "icono": "abc",
       "estado": "disponible",
       "progreso": 3,
       "totalActividades": 10,
-      "esDemo": true
+      "esDemo": false
     },
     {
       "id": 2,

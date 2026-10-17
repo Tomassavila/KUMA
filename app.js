@@ -141,11 +141,14 @@ function pantallaInicio() {
 
 // Tarjeta de una lección (los datos vienen del JSON)
 function tarjetaLeccion(l, indice) {
+    if (l.id === 1) l = { ...l, progreso: leerEstado().completadas.length, totalActividades: 10 };
   const bloqueada = l.estado === "bloqueada";
   const porcentaje = Math.round((l.progreso / l.totalActividades) * 100);
   const boton = bloqueada
     ? `<button class="boton gris" data-aviso="Esta lección se desbloquea más adelante">${icono("lock")} Bloqueada</button>`
-    : `<button class="boton" data-aviso="Las actividades llegan en el Sprint 2">${icono("play")} JUGAR</button>`;
+    : l.id === 1
+      ? `<a class="boton" href="#/alfabeto">${icono("play")} JUGAR</a>`
+      : `<button class="boton" data-aviso="Las actividades llegan en el Sprint 2">${icono("play")} JUGAR</button>`;
   return `
   <article class="tarjeta leccion tono-${indice % 4} ${bloqueada ? "bloqueada" : ""}" style="animation-delay:${indice * 0.08}s">
     <span class="esquina-hojas" aria-hidden="true"></span>
@@ -155,7 +158,7 @@ function tarjetaLeccion(l, indice) {
     </div>
     <p>${limpiar(l.descripcion)}</p>
     <div class="barra" role="progressbar" aria-valuenow="${porcentaje}" aria-valuemin="0" aria-valuemax="100"><span style="width:${porcentaje}%"></span></div>
-    <div class="pie"><span>${l.progreso} / ${l.totalActividades} actividades</span>${boton}</div>
+<div class="pie"><span>${l.progreso} / ${l.totalActividades} ${l.id === 1 ? "lecciones" : "actividades"}</span>${boton}</div>
   </article>`;
 }
 
@@ -213,7 +216,7 @@ const rutas = { inicio: pantallaInicio, lecciones: pantallaLecciones, perfil: pa
 
 // Lee la ruta del hash: "#/lecciones" -> "lecciones"
 function ruta() {
-  const nombre = location.hash.replace("#/", "");
+  const nombre = location.hash.replace("#/", "").split("/")[0];
   return rutas[nombre] ? nombre : "inicio";
 }
 
@@ -222,7 +225,7 @@ function navegar() {
   if (!location.hash) history.replaceState(null, "", "#/inicio");
   // Marca el botón activo del menú
   document.querySelectorAll(".menu a").forEach(a => {
-    const activa = a.dataset.ruta === nombre;
+        const activa = a.dataset.ruta === nombre || (a.dataset.ruta === "lecciones" && ["alfabeto", "leccion"].includes(nombre));
     a.classList.toggle("activo", activa);
     if (activa) a.setAttribute("aria-current", "page");
     else a.removeAttribute("aria-current");
