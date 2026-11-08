@@ -116,9 +116,9 @@ function pantallaInicio() {
     <section class="accesos" aria-labelledby="accesos-titulo">
       <div class="encabezado-seccion"><div><p class="sobrelinea">Tu aventura empieza aquí</p><h2 id="accesos-titulo">¿Qué exploramos hoy?</h2></div><span class="ramita" aria-hidden="true">❧</span></div>
       <div class="accesos-grid">
-        <a class="acceso-card acceso-alfabeto" href="#/lecciones"><span class="acceso-ilustra">${icono("abc")}<i class="mini-flor" aria-hidden="true"></i></span><span><strong>El alfabeto</strong><small>Descubre las letras con tus manos</small></span><span class="flecha-acceso" aria-hidden="true">↗</span></a>
-        <a class="acceso-card acceso-saludos" href="#/lecciones"><span class="acceso-ilustra">${icono("chat")}<i class="mini-hoja" aria-hidden="true"></i></span><span><strong>Saludos</strong><small>¡Di hola de una nueva manera!</small></span><span class="flecha-acceso" aria-hidden="true">↗</span></a>
-        <a class="acceso-card acceso-vocabulario" href="#/lecciones"><span class="acceso-ilustra">${icono("hand")}<i class="mini-estrella" aria-hidden="true">✦</i></span><span><strong>Palabras básicas</strong><small>Pequeñas señas, grandes conexiones</small></span><span class="flecha-acceso" aria-hidden="true">↗</span></a>
+        <a class="acceso-card acceso-alfabeto" href="#/alfabeto"><span class="acceso-ilustra">${icono("abc")}<i class="mini-flor" aria-hidden="true"></i></span><span><strong>El alfabeto</strong><small>Descubre las letras con tus manos</small></span><span class="flecha-acceso" aria-hidden="true">↗</span></a>
+        <a class="acceso-card acceso-saludos" href="#/saludos"><span class="acceso-ilustra">${icono("chat")}<i class="mini-hoja" aria-hidden="true"></i></span><span><strong>Saludos</strong><small>¡Di hola de una nueva manera!</small></span><span class="flecha-acceso" aria-hidden="true">↗</span></a>
+        <a class="acceso-card acceso-vocabulario" href="#/palabras"><span class="acceso-ilustra">${icono("hand")}<i class="mini-estrella" aria-hidden="true">✦</i></span><span><strong>Palabras básicas</strong><small>Pequeñas señas, grandes conexiones</small></span><span class="flecha-acceso" aria-hidden="true">↗</span></a>
       </div>
     </section>
 
@@ -141,14 +141,24 @@ function pantallaInicio() {
 
 // Tarjeta de una lección (los datos vienen del JSON)
 function tarjetaLeccion(l, indice) {
-    if (l.id === 1) l = { ...l, progreso: leerEstado().completadas.length, totalActividades: 10 };
+  if (l.id === 2) {
+    l = { ...l, progreso: salEstado(leerEstado()).completadas.length, totalActividades: 5 };
+  } else if (l.id === 3) {
+    l = { ...l, progreso: palEstado(leerEstado()).completadas.length, totalActividades: PAL_LECCIONES.length };
+  }
   const bloqueada = l.estado === "bloqueada";
-  const porcentaje = Math.round((l.progreso / l.totalActividades) * 100);
+  const porcentaje = l.totalActividades
+    ? Math.min(100, Math.round((l.progreso / l.totalActividades) * 100))
+    : 0;
   const boton = bloqueada
     ? `<button class="boton gris" data-aviso="Esta lección se desbloquea más adelante">${icono("lock")} Bloqueada</button>`
     : l.id === 1
       ? `<a class="boton" href="#/alfabeto">${icono("play")} JUGAR</a>`
-      : `<button class="boton" data-aviso="Las actividades llegan en el Sprint 2">${icono("play")} JUGAR</button>`;
+      : l.id === 2
+        ? `<a class="boton" href="#/saludos">${icono("play")} JUGAR</a>`
+        : l.id === 3
+          ? `<a class="boton" href="#/palabras">${icono("play")} JUGAR</a>`
+          : `<button class="boton" data-aviso="Las actividades llegan en el Sprint 2">${icono("play")} JUGAR</button>`;
   return `
   <article class="tarjeta leccion tono-${indice % 4} ${bloqueada ? "bloqueada" : ""}" style="animation-delay:${indice * 0.08}s">
     <span class="esquina-hojas" aria-hidden="true"></span>
@@ -225,7 +235,7 @@ function navegar() {
   if (!location.hash) history.replaceState(null, "", "#/inicio");
   // Marca el botón activo del menú
   document.querySelectorAll(".menu a").forEach(a => {
-        const activa = a.dataset.ruta === nombre || (a.dataset.ruta === "lecciones" && ["alfabeto", "leccion"].includes(nombre));
+        const activa = a.dataset.ruta === nombre || (a.dataset.ruta === "lecciones" && ["alfabeto", "leccion", "saludos", "saludo", "palabras", "palabra"].includes(nombre));
     a.classList.toggle("activo", activa);
     if (activa) a.setAttribute("aria-current", "page");
     else a.removeAttribute("aria-current");

@@ -14,32 +14,22 @@
     {
       "id": 2,
       "titulo": "Saludos",
-      "descripcion": "Lección de prueba con progreso en cero.",
+      "descripcion": "Aprende a saludar, despedirte y ser cortés en LSC.",
       "icono": "chat",
       "estado": "disponible",
       "progreso": 0,
-      "totalActividades": 8,
-      "esDemo": true
+      "totalActividades": 5,
+      "esDemo": false
     },
     {
       "id": 3,
       "titulo": "Palabras básicas",
-      "descripcion": "Lección de prueba que aparece bloqueada.",
+      "descripcion": "Aprende a preguntar, expresar ideas y responder en LSC.",
       "icono": "hand",
-      "estado": "bloqueada",
+      "estado": "disponible",
       "progreso": 0,
-      "totalActividades": 12,
-      "esDemo": true
-    },
-    {
-      "id": 4,
-      "titulo": "Familia",
-      "descripcion": "Lección de prueba que aparece bloqueada.",
-      "icono": "people",
-      "estado": "bloqueada",
-      "progreso": 0,
-      "totalActividades": 10,
-      "esDemo": true
+      "totalActividades": 7,
+      "esDemo": false
     }
   ]
 }

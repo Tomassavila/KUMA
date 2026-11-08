@@ -44,7 +44,7 @@ const LECCIONES_ALFABETO = [
 ];
 
 // Palabras para los ejercicios de "deletrea" (solo salen si ya conoces sus letras)
-const PALABRAS = ["CAFE", "BEBE", "HADA", "BIEN", "DADO", "CAJA", "FAJA", "GAFAS", "LUNA", "MESA", "CASA", "PAN", "AGUA", "GATO",
+const PALABRAS_DELETREO = ["CAFE", "BEBE", "HADA", "BIEN", "DADO", "CAJA", "FAJA", "GAFAS", "LUNA", "MESA", "CASA", "PAN", "AGUA", "GATO",
   "KUMA", "UIS", "OSO", "SOL", "SAPO", "NUBE", "FLOR", "MANO", "AMOR", "LOMA", "PATO", "RANA", "VIDA", "YOGA", "ZONA", "TAZA",
   "NIÑO", "SEÑA", "PIÑA", "UÑA", "MOÑO", "LAPIZ"];
 
@@ -201,7 +201,7 @@ const TIPOS = ["sena2letra", "letra2sena", "escribe", "vf"];
 
 function paso(tipo, letra, extra) { return { tipo, letra, ...(extra || {}) }; }
 
-function palabrasPosibles(pool) { return PALABRAS.filter(w => [...w].every(c => pool.includes(c))); }
+function palabrasPosibles(pool) { return PALABRAS_DELETREO.filter(w => [...w].every(c => pool.includes(c))); }
 
 function opcionesLetras(correcta, pool) {
   const n = Math.min(4, pool.length);
@@ -442,8 +442,8 @@ function cuerpoPaso(s) {
 
   if (s.tipo === "palabra") {
     if (!s.opc) {
-      const mismas = barajar(PALABRAS.filter(w => w !== s.palabra && Math.abs(w.length - s.palabra.length) <= 1));
-      const extra = barajar(PALABRAS.filter(w => w !== s.palabra && !mismas.includes(w)));
+      const mismas = barajar(PALABRAS_DELETREO.filter(w => w !== s.palabra && Math.abs(w.length - s.palabra.length) <= 1));
+      const extra = barajar(PALABRAS_DELETREO.filter(w => w !== s.palabra && !mismas.includes(w)));
       s.opc = barajar([s.palabra, ...mismas.concat(extra).slice(0, 3)]);
     }
     return `<p class="juego-consigna">¿Qué palabra deletrean estas señas?</p>

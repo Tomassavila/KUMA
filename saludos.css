@@ -1,0 +1,42 @@
+/* =========================================================
+   Kuma - Saludos (complemento de alfabeto.css)
+   Reutiliza las clases de alfabeto.css; aquí solo lo nuevo.
+   ========================================================= */
+
+.sal-nombre { font-size: clamp(1.9rem, 6vw, 2.6rem); font-weight: 700; line-height: 1.05; color: var(--esmeralda);
+  text-shadow: 0 3px 0 #fff, 0 6px 0 var(--verde-suave); }
+.sal-info { display: grid; gap: 10px; width: 100%; max-width: 540px; text-align: left; font-size: .95rem; line-height: 1.45; }
+.sal-info p { margin: 0; }
+.sal-ejemplos { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.sal-ejemplos li { display: grid; gap: 2px; padding: 10px 12px; background: #fff; border: 2px solid var(--verde-pastel); border-radius: 14px; }
+.sal-glosa { font-size: .74rem; font-weight: 700; letter-spacing: .06em; color: var(--esmeralda-osc); }
+.sal-credito { max-width: 480px; font-size: .74rem; line-height: 1.35; opacity: .75; }
+
+.sal-def { width: 100%; max-width: 540px; padding: 16px; font-size: 1.1rem; font-weight: 600; line-height: 1.45; text-align: left;
+  background: #fff; border: 3px solid var(--verde-pastel); border-radius: 20px; }
+.sal-def.sal-frase { font-size: 1.25rem; text-align: center; }
+.hueco { display: inline-block; min-width: 3.4em; margin: 0 4px; border-bottom: 4px solid var(--esmeralda); }
+
+.opciones-textos { grid-template-columns: repeat(2, 1fr); }
+.opciones-textos .opcion { font-size: 1.1rem; }
+.par-item.par-texto { font-size: 1rem; line-height: 1.2; }
+
+.sal-creditos { display: grid; gap: 6px; font-size: .88rem; line-height: 1.45; }
+.sal-creditos a { color: var(--esmeralda-osc); font-weight: 700; overflow-wrap: anywhere; }
+
+@media (max-width: 560px) {
+  .opciones-textos { grid-template-columns: 1fr; }
+}
+/* Flashcards de saludos */
+.fc-grid.fc-grid-sal { grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); }
+.fc-dorso .sal-fc-nombre { font-size: 1.6rem; font-weight: 700; line-height: 1.1; text-align: center; color: var(--esmeralda-osc); }
+@media (max-width: 760px) {
+  .fc-grid.fc-grid-sal { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* Flashcards de saludos */
+.fc-grid.fc-grid-sal { grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); }
+.fc-dorso .sal-fc-nombre { font-size: 1.6rem; font-weight: 700; line-height: 1.1; text-align: center; color: var(--esmeralda-osc); }
+@media (max-width: 760px) {
+  .fc-grid.fc-grid-sal { grid-template-columns: repeat(2, 1fr); }
+}
