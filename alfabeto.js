@@ -161,10 +161,10 @@ function senaFalta(img, l) {
 
 function estadoBase() { return { completadas: [], estrellas: {}, xp: 0, racha: 0, ultimaFecha: null, cajas: {} }; }
 function leerEstado() {
-  try { const e = JSON.parse(localStorage.getItem(CLAVE_GUARDADO)); if (e) return { ...estadoBase(), ...e }; } catch (_) { /* sin datos */ }
+  try { const e = JSON.parse(localStorage.getItem(KumaAuth.key(CLAVE_GUARDADO))); if (e) return { ...estadoBase(), ...e }; } catch (_) { /* sin datos */ }
   return estadoBase();
 }
-function guardarEstado(e) { try { localStorage.setItem(CLAVE_GUARDADO, JSON.stringify(e)); } catch (_) { /* sin guardado */ } }
+function guardarEstado(e) { try { localStorage.setItem(KumaAuth.key(CLAVE_GUARDADO), JSON.stringify(e)); } catch (_) { /* sin guardado */ } }
 
 function fechaLocal(d = new Date()) {
   return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
@@ -311,6 +311,7 @@ function pantallaAlfabeto() {
     <div class="alfa-acciones">
       <div class="tarjeta accion"><h2>Repaso espaciado</h2><p>${sabidas.length ? (pendientes ? "Hay " + pendientes + " letra(s) esperando su repaso." : "Todo al día. ¡Repasar de más no hace daño!") : "Se activa cuando termines la lección 1."}</p>${repaso}</div>
       <div class="tarjeta accion"><h2>Flashcards del alfabeto</h2><p>Mira la seña, adivina la letra y voltea la tarjeta.</p><a class="boton" href="#/flashcards">${icono("hand")} VER TARJETAS</a></div>
+      <div class="tarjeta accion"><h2>Practica con cámara</h2><p>Haz la seña frente a la cámara y comprueba si Kuma reconoce cada letra.</p><a class="boton" href="#/camara">${icono("hand")} PRACTICAR</a></div>
     </div>
     <a class="volver" href="#/lecciones">← Volver a lecciones</a>
   </section>`;

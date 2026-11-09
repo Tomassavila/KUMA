@@ -1,0 +1,416 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kuma · Grabar señas del alfabeto</title>
+<style>
+  :root { --verde:#27ae60; --verde-claro:#e8f8ee; --borde:#cfe9d8; }
+  * { box-sizing: border-box; }
+  body { margin:0; padding:16px; font-family: system-ui, sans-serif; background:#f6fbf8; color:#1d2b22; }
+  h1 { margin:0 0 4px; font-size:1.4rem; }
+  .sub { margin:0 0 14px; font-size:.9rem; opacity:.8; }
+  .grid { display:grid; grid-template-columns: minmax(0,1.2fr) minmax(0,1fr); gap:16px; align-items:start; }
+  .cam { position:relative; aspect-ratio:4/3; background:#111; border-radius:16px; overflow:hidden; }
+  .cam video, .cam canvas { position:absolute; inset:0; width:100%; height:100%; object-fit:contain; transform:scaleX(-1); }
+  #estado { position:absolute; left:10px; top:10px; padding:6px 12px; border-radius:999px; background:rgba(0,0,0,.65); color:#fff; font-size:.85rem; }
+  .panel { display:grid; gap:10px; }
+  button, .archivo { font:inherit; padding:10px 14px; border:0; border-radius:12px; background:var(--verde); color:#fff; font-weight:700; cursor:pointer; text-align:center; }
+  button:disabled { opacity:.45; cursor:not-allowed; }
+  button.sec, .archivo { background:#fff; color:var(--verde); border:2px solid var(--verde); }
+  .archivo input { display:none; }
+  #prueba { min-height:70px; padding:10px; border:2px dashed var(--borde); border-radius:12px; background:#fff; font-size:.95rem; }
+  #prueba b { font-size:2rem; color:var(--verde); }
+  #letras { display:grid; grid-template-columns: repeat(auto-fill, minmax(78px,1fr)); gap:8px; margin-top:16px; }
+  .dataset { padding:12px; border:2px solid var(--borde); border-radius:14px; background:#fff; }
+  .dataset h2 { margin:0 0 6px; font-size:1.05rem; }
+  .dataset p { margin:0 0 8px; font-size:.85rem; line-height:1.4; }
+  .zona-pegar { padding:16px 10px; border:2px dashed var(--verde); border-radius:12px; background:var(--verde-claro); text-align:center; cursor:pointer; }
+  .zona-pegar:focus, .zona-pegar.sobre { outline:3px solid #b5e6c7; background:#ddf5e6; }
+  .zona-pegar strong, .zona-pegar span { display:block; }
+  .zona-pegar span { margin-top:4px; font-size:.82rem; }
+  #dataset-estado { min-height:1.3em; margin:6px 0 0; color:#176b3b; font-weight:600; }
+  .letra { position:relative; padding:8px 4px 12px; background:#fff; color:#1d2b22; border:2px solid var(--borde); border-radius:12px; font-size:1.3rem; }
+  .letra small { display:block; font-size:.7rem; font-weight:600; opacity:.7; }
+  .letra .barra { position:absolute; left:6px; right:6px; bottom:4px; height:4px; background:var(--verde-claro); border-radius:2px; overflow:hidden; }
+  .letra .barra i { display:block; height:100%; background:var(--verde); }
+  .letra.sel { border-color:var(--verde); box-shadow:0 0 0 3px var(--verde-claro); }
+  .letra.ok { background:var(--verde-claro); }
+  ul { margin:8px 0 0; padding-left:18px; font-size:.85rem; line-height:1.45; }
+  @media (max-width:760px){ .grid{ grid-template-columns:1fr; } }
+</style>
+<link rel="stylesheet" href="maximalista.css?v=6">
+</head>
+<body class="pagina-grabacion">
+  <h1>Grabar señas del alfabeto</h1>
+  <p class="sub">Elige una letra, haz la seña frente a la cámara y pulsa “Grabar”. Objetivo: al menos 40 muestras por letra, de varias personas.</p>
+
+  <div class="grid">
+    <div class="cam">
+      <video id="v" playsinline muted autoplay></video>
+      <canvas id="c"></canvas>
+      <div id="estado">Cámara apagada</div>
+    </div>
+    <div class="panel">
+      <button id="btn-cam">Activar cámara</button>
+      <div>Letra seleccionada: <b id="sel">—</b></div>
+      <button id="btn-grabar" disabled>Grabar 4 segundos</button>
+      <button id="btn-probar" class="sec" disabled>Probar reconocimiento</button>
+      <div id="prueba">Aquí verás qué letra reconoce cuando pulses “Probar”.</div>
+      <button id="btn-descargar" class="sec">Descargar senas.json</button>
+      <label class="archivo">Importar senas.json (suma a lo que ya tienes)<input type="file" id="imp" accept=".json,application/json"></label>
+      <section class="dataset">
+        <h2>Importar dataset de imágenes</h2>
+        <p>Organiza las fotos en carpetas por letra (por ejemplo, <b>dataset/A</b>, <b>dataset/B</b>). Se procesan en este navegador; las fotos no se suben.</p>
+        <button id="btn-lsc70" class="sec">Cargar dataset LSC colombiano (3.780 imágenes)</button>
+        <p>Incluye el alfabeto LSC A–Z y Ñ, con fotos de 70 voluntarios. La primera carga puede tardar varios minutos y se guarda en este navegador.</p>
+        <div id="zona-pegar" class="zona-pegar" tabindex="0" role="button" aria-label="Pegar imágenes para la letra seleccionada">
+          <strong>Pega aquí tus imágenes con Ctrl+V</strong>
+          <span id="zona-pegar-ayuda">Primero selecciona una letra abajo; también puedes arrastrar aquí las imágenes.</span>
+        </div>
+        <label class="archivo">Elegir carpeta del dataset<input type="file" id="dataset-dir" webkitdirectory directory multiple accept="image/*"></label>
+        <label class="archivo" style="margin-top:8px">Elegir imágenes sueltas<input type="file" id="dataset-files" multiple accept="image/*"></label>
+        <p id="dataset-estado" role="status" aria-live="polite">Las imágenes sueltas deben iniciar con la letra y guion bajo, por ejemplo A_01.jpg.</p>
+      </section>
+      <button id="btn-borrar" class="sec">Borrar muestras de la letra elegida</button>
+      <ul>
+        <li>Mueve y gira un poco la mano mientras grabas (sin cambiar la seña).</li>
+        <li>Graba con luz buena y fondo sencillo; repite con otras personas y distancias.</li>
+        <li>Con la mano izquierda o derecha sirve: se normaliza solo.</li>
+        <li>Letras con giro (F y G): graba la mano en la posición de inicio y también en la posición final. Se aceptará cualquiera de las dos.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div id="letras"></div>
+
+<script src="Camara%20core.js"></script>
+<script>
+const LETRAS = "ABCDEFGHIJKLMNÑOPQRSTUVWXYZ".split("");   // edita si tu alfabeto tiene más (LL, RR…)
+const DOS_POSES = ["F", "G"];   // letras con giro: se graban en dos posiciones (inicio y final)
+const META = 40, META_DOS = 70, INTERVALO = 120, ESPERA = 2000, DURACION = 4000;
+const metaDe = l => DOS_POSES.includes(l) ? META_DOS : META;
+
+const $ = id => document.getElementById(id);
+const video = $("v"), canvas = $("c"), ctx = canvas.getContext("2d");
+let muestras = KumaCam.leerLocal();
+let sel = null, modo = "idle", ultimaMuestra = 0, tInicio = 0, tFin = 0, listo = false, bucleId = 0, datasetEnProceso = false;
+
+function estado(t) { $("estado").textContent = t; }
+
+function pintarLetras() {
+  const c = KumaCam.conteos(muestras);
+  $("letras").innerHTML = LETRAS.map(l => {
+    const n = c[l] || 0, m = metaDe(l);
+    return `<button class="letra ${sel === l ? "sel" : ""} ${n >= m ? "ok" : ""}" data-l="${l}">${l}<small>${n}/${m}</small><span class="barra"><i style="width:${Math.min(100, n / m * 100)}%"></i></span></button>`;
+  }).join("");
+  actualizarZonaPegar();
+}
+
+function actualizarZonaPegar() {
+  const ayuda = $("zona-pegar-ayuda");
+  if (ayuda) ayuda.textContent = sel
+    ? `Letra seleccionada: ${sel}. Haz clic aquí y pega con Ctrl+V, o arrastra las imágenes.`
+    : "Primero selecciona una letra abajo; también puedes arrastrar aquí las imágenes.";
+}
+
+$("letras").addEventListener("click", e => {
+  const b = e.target.closest("[data-l]"); if (!b) return;
+  sel = b.dataset.l;
+  $("sel").textContent = sel + (DOS_POSES.includes(sel) ? "  (graba 2 veces: posición inicial y posición final)" : "");
+  $("btn-grabar").disabled = !listo;
+  pintarLetras();
+});
+
+$("btn-cam").addEventListener("click", async () => {
+  if (listo) { apagarCamara(); return; }
+  $("btn-cam").disabled = true;
+  estado("Pidiendo la cámara…");
+  console.log("Página:", location.href, "· contexto seguro:", window.isSecureContext);
+
+  // Paso 1: solo la cámara
+  try {
+    await KumaCam.abrirCamara(video);
+  } catch (e) {
+    console.error("Error de cámara:", e);
+    const nombre = e.name || e.message || "Error desconocido";
+    const pista = nombre === "AbortError"
+      ? "Brave no pudo iniciar la transmisión. Cierra otras pestañas o aplicaciones que usen la cámara y vuelve a intentar."
+      : nombre === "NotReadableError"
+        ? "La cámara está ocupada o Windows no pudo abrirla. Cierra otras aplicaciones que la usen y vuelve a intentar."
+        : nombre === "NotAllowedError" || nombre === "SecurityError"
+          ? "El permiso está bloqueado. Permite la cámara para 127.0.0.1 en el icono junto a la dirección."
+          : nombre === "NotFoundError"
+            ? "Brave no detecta una cámara conectada."
+            : "Comprueba que la cámara esté conectada y que esta página use localhost o HTTPS.";
+    estado(`Falló ${e.etapa || "la cámara"}: ${nombre}`);
+    $("btn-cam").disabled = false;
+    alert(`No se pudo abrir la cámara (${nombre}).\nFase: ${e.etapa || "acceso"}.\n\n${pista}`);
+    return;
+  }
+
+  // Paso 2: el modelo de reconocimiento
+  estado("Cámara lista. Cargando el modelo…");
+  try {
+    await KumaCam.cargarModelo();
+  } catch (e) {
+    console.error("Error del modelo:", e);
+    KumaCam.cerrarCamara(video);
+    estado("Falló el MODELO"); $("btn-cam").disabled = false;
+    alert("La cámara sí abrió, pero no se pudo descargar el modelo de reconocimiento.\n" +
+      "Suele ser Brave Shields (icono del león → desactívalo para esta página), falta de internet o un bloqueador.\n\nDetalle: " + (e.message || e));
+    return;
+  }
+
+  canvas.width = video.videoWidth; canvas.height = video.videoHeight;
+  listo = true; estado("Listo · pulsa “Cerrar cámara” al terminar");
+  $("btn-cam").textContent = "Cerrar cámara";
+  $("btn-probar").disabled = false; $("btn-grabar").disabled = !sel;
+  bucle();
+});
+
+function apagarCamara() {
+  listo = false;
+  modo = "idle";
+  if (bucleId) cancelAnimationFrame(bucleId);
+  bucleId = 0;
+  KumaCam.cerrarCamara(video);
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  $("btn-cam").textContent = "Activar cámara";
+  $("btn-cam").disabled = false;
+  $("btn-grabar").disabled = true;
+  $("btn-probar").disabled = true;
+  $("btn-probar").textContent = "Probar reconocimiento";
+  $("prueba").textContent = "Aquí verás qué letra reconoce cuando pulses “Probar”.";
+  estado("Cámara apagada");
+}
+
+$("btn-grabar").addEventListener("click", () => {
+  if (!sel || !listo) return;
+  modo = "grabando"; tInicio = performance.now() + ESPERA; tFin = tInicio + DURACION; ultimaMuestra = 0;
+  $("btn-grabar").disabled = true; $("btn-probar").disabled = true;
+});
+
+$("btn-probar").addEventListener("click", () => {
+  if (modo === "probar") { modo = "idle"; $("btn-probar").textContent = "Probar reconocimiento"; return; }
+  if (!muestras.length) { alert("Aún no hay muestras grabadas."); return; }
+  modo = "probar"; $("btn-probar").textContent = "Detener prueba";
+});
+
+function bucle() {
+  const r = KumaCam.detectar(video);
+  const ahora = performance.now();
+  if (r !== undefined) {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    if (r) KumaCam.dibujar(ctx, r.puntos, canvas.width, canvas.height);
+
+    if (modo === "grabando") {
+      if (ahora < tInicio) estado(`Prepárate… ${Math.ceil((tInicio - ahora) / 1000)}`);
+      else if (ahora < tFin) {
+        estado(r ? `Grabando ${sel}… ${Math.ceil((tFin - ahora) / 1000)}` : "No veo la mano");
+        if (r && ahora - ultimaMuestra >= INTERVALO) {
+          ultimaMuestra = ahora;
+          muestras.push({ l: sel, f: KumaCam.caracteristicas(r.puntos, r.etiqueta, r.aspecto) });
+        }
+      } else {
+        modo = "idle"; KumaCam.guardarLocal(muestras); estado("Guardado"); pintarLetras();
+        $("btn-grabar").disabled = false; $("btn-probar").disabled = false;
+      }
+    } else if (modo === "probar") {
+      if (!r) { $("prueba").innerHTML = "No veo la mano."; }
+      else {
+        const p = KumaCam.clasificar(KumaCam.caracteristicas(r.puntos, r.etiqueta, r.aspecto), muestras, 5);
+        $("prueba").innerHTML = `Letra: <b>${p.letra}</b><br>Coincidencia: ${Math.round(p.conf * 100)}% · Distancia: ${p.dist.toFixed(2)}`;
+      }
+    }
+  }
+  bucleId = requestAnimationFrame(bucle);
+}
+
+window.addEventListener("pagehide", apagarCamara);
+
+$("btn-descargar").addEventListener("click", () => {
+  descargarMuestras(muestras, "senas.json");
+});
+
+function descargarMuestras(lista, nombre) {
+  const blob = new Blob([JSON.stringify({ version: 1, muestras: lista })], { type: "application/json" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob); a.download = nombre; a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+}
+
+function letraDesdeTexto(texto) {
+  const s = texto.normalize("NFC").trim().toLocaleUpperCase("es");
+  return LETRAS.includes(s) ? s : null;
+}
+
+function letraDeImagen(archivo) {
+  const carpetas = (archivo.webkitRelativePath || "").split(/[\\/]/).slice(0, -1);
+  for (let i = carpetas.length - 1; i >= 0; i--) {
+    const l = letraDesdeTexto(carpetas[i]);
+    if (l) return l;
+  }
+  const nombre = archivo.name.replace(/\.[^.]+$/, "");
+  const prefijo = nombre.match(/^([A-ZÑ])(?:[_\-\s.]|$)/iu);
+  return prefijo ? letraDesdeTexto(prefijo[1]) : null;
+}
+
+async function importarImagenes(archivos, etiquetaFijada = null) {
+  if (datasetEnProceso) return;
+  const imagenes = [...archivos].filter(f => f.type.startsWith("image/") || /\.(png|jpe?g|webp|bmp|gif|avif)$/i.test(f.name));
+  if (!imagenes.length) {
+    $("dataset-estado").textContent = "No encontré imágenes compatibles en la selección.";
+    return;
+  }
+
+  const letraSeleccionada = etiquetaFijada ? letraDesdeTexto(etiquetaFijada) : null;
+  const etiquetadas = imagenes.map(archivo => ({ archivo, letra: letraSeleccionada || letraDeImagen(archivo) })).filter(x => x.letra);
+  const sinEtiqueta = imagenes.length - etiquetadas.length;
+  if (!etiquetadas.length) {
+    $("dataset-estado").textContent = "No pude obtener las letras. Usa carpetas A, B, C… o nombres como A_01.jpg.";
+    return;
+  }
+
+  datasetEnProceso = true;
+  $("dataset-dir").disabled = true;
+  $("dataset-files").disabled = true;
+  if (listo) apagarCamara();
+  const nuevas = [];
+  let sinMano = 0, errorImagen = 0;
+  try {
+    $("dataset-estado").textContent = "Cargando el modelo de manos…";
+    await KumaCam.cargarModeloImagen();
+    for (let i = 0; i < etiquetadas.length; i++) {
+      const { archivo, letra } = etiquetadas[i];
+      let bitmap;
+      try {
+        bitmap = await createImageBitmap(archivo);
+        const mano = KumaCam.detectarImagen(bitmap);
+        if (mano) nuevas.push({ l: letra, f: KumaCam.caracteristicas(mano.puntos, mano.etiqueta, mano.aspecto) });
+        else sinMano++;
+      } catch (e) { errorImagen++; }
+      finally { if (bitmap) bitmap.close(); }
+      if ((i + 1) % 5 === 0 || i + 1 === etiquetadas.length) {
+        $("dataset-estado").textContent = `Procesando ${i + 1}/${etiquetadas.length} imágenes… (${nuevas.length} manos detectadas)`;
+        await new Promise(resolve => setTimeout(resolve, 0));
+      }
+    }
+
+    if (!nuevas.length) {
+      $("dataset-estado").textContent = `No detecté manos en las fotos. Revisa que las señas se vean completas y con buena luz. (${errorImagen} archivo(s) no se pudieron leer.)`;
+      return;
+    }
+
+    const combinadas = muestras.concat(nuevas);
+    if (!KumaCam.guardarLocal(combinadas)) {
+      descargarMuestras(nuevas, "senas-importadas.json");
+      $("dataset-estado").textContent = `El navegador no tuvo espacio para guardar todo. Descargué ${nuevas.length} muestras como senas-importadas.json.`;
+      return;
+    }
+    muestras = combinadas;
+    pintarLetras();
+    $("dataset-estado").textContent = `Listo: ${nuevas.length} muestras añadidas. Sin mano: ${sinMano}; sin letra: ${sinEtiqueta}; archivos con error: ${errorImagen}.`;
+  } catch (e) {
+    console.error("Error al importar el dataset:", e);
+    $("dataset-estado").textContent = "No pude cargar el modelo de manos. Revisa la conexión y vuelve a intentar.";
+  } finally {
+    datasetEnProceso = false;
+    $("dataset-dir").disabled = false;
+    $("dataset-files").disabled = false;
+    $("dataset-dir").value = "";
+    $("dataset-files").value = "";
+  }
+}
+
+$("dataset-dir").addEventListener("change", e => importarImagenes(e.target.files));
+$("dataset-files").addEventListener("change", e => importarImagenes(e.target.files));
+
+$("btn-lsc70").addEventListener("click", async () => {
+  if (datasetEnProceso) return;
+  const boton = $("btn-lsc70");
+  boton.disabled = true;
+  try {
+    $("dataset-estado").textContent = "Leyendo el índice del dataset LSC70…";
+    const r = await fetch("data/lsc70-alfabeto/manifest.json", { cache: "no-cache" });
+    if (!r.ok) throw new Error("No encontré el índice del dataset LSC70.");
+    const j = await r.json();
+    if (!Array.isArray(j.samples) || !j.samples.length) throw new Error("El índice del dataset está vacío.");
+    const archivos = [];
+    const lote = 40;
+    for (let inicio = 0; inicio < j.samples.length; inicio += lote) {
+      const grupo = j.samples.slice(inicio, inicio + lote);
+      const nuevos = await Promise.all(grupo.map(async (m, n) => {
+        const imagen = await fetch(`data/lsc70-alfabeto/${encodeURIComponent(m.src).replace(/%2F/g, "/")}`);
+        if (!imagen.ok) throw new Error(`No pude leer la imagen ${m.src}.`);
+        const numero = String(inicio + n + 1).padStart(4, "0");
+        return new File([await imagen.blob()], `${m.l}_${numero}.jpg`, { type: "image/jpeg" });
+      }));
+      archivos.push(...nuevos);
+      $("dataset-estado").textContent = `Preparando imágenes LSC70: ${archivos.length}/${j.samples.length}…`;
+    }
+    await importarImagenes(archivos);
+  } catch (e) {
+    console.error("Error al cargar LSC70:", e);
+    $("dataset-estado").textContent = `No pude cargar el dataset LSC70: ${e.message}`;
+  } finally {
+    boton.disabled = false;
+  }
+});
+
+const zonaPegar = $("zona-pegar");
+zonaPegar.addEventListener("paste", e => {
+  const archivos = [];
+  for (const item of e.clipboardData?.items || []) {
+    if (item.kind === "file" && item.type.startsWith("image/")) {
+      const archivo = item.getAsFile();
+      if (archivo) archivos.push(archivo);
+    }
+  }
+  if (!archivos.length) {
+    $("dataset-estado").textContent = "El portapapeles no contiene imágenes. Copia una imagen y vuelve a pegarla aquí.";
+    return;
+  }
+  e.preventDefault();
+  if (!sel) {
+    $("dataset-estado").textContent = "Selecciona primero la letra que muestran estas imágenes.";
+    return;
+  }
+  importarImagenes(archivos, sel);
+});
+
+zonaPegar.addEventListener("dragover", e => { e.preventDefault(); zonaPegar.classList.add("sobre"); });
+zonaPegar.addEventListener("dragleave", () => zonaPegar.classList.remove("sobre"));
+zonaPegar.addEventListener("drop", e => {
+  e.preventDefault();
+  zonaPegar.classList.remove("sobre");
+  if (!sel) {
+    $("dataset-estado").textContent = "Selecciona primero la letra que muestran estas imágenes.";
+    return;
+  }
+  importarImagenes(e.dataTransfer.files, sel);
+});
+
+$("imp").addEventListener("change", async e => {
+  const f = e.target.files[0]; if (!f) return;
+  try {
+    const j = JSON.parse(await f.text());
+    if (!Array.isArray(j.muestras)) throw new Error("formato");
+    muestras = muestras.concat(j.muestras);
+    KumaCam.guardarLocal(muestras); pintarLetras();
+    alert(`Importadas ${j.muestras.length} muestras.`);
+  } catch (err) { alert("El archivo no tiene el formato esperado."); }
+  e.target.value = "";
+});
+
+$("btn-borrar").addEventListener("click", () => {
+  if (!sel) { alert("Elige primero una letra."); return; }
+  if (!confirm(`¿Borrar las muestras de la letra ${sel}?`)) return;
+  muestras = muestras.filter(m => m.l !== sel);
+  KumaCam.guardarLocal(muestras); pintarLetras();
+});
+
+pintarLetras();
+</script>
+</body>
+</html>

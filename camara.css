@@ -1,0 +1,30 @@
+/* =========================================================
+   Kuma - Práctica con cámara (complemento de los otros CSS)
+   ========================================================= */
+
+.cam-tarjeta { width: 100%; }
+.cam-fila { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); gap: 14px; align-items: center; width: 100%; }
+.cam-modelo { display: grid; justify-items: center; gap: 8px; }
+.cam-modelo .sena-grande { max-width: 200px; }
+
+/* Cámara en espejo, como un espejo real */
+.cam-caja { position: relative; aspect-ratio: 4 / 3; width: 100%; background: #111; border-radius: 18px; overflow: hidden;
+  border: 3px solid var(--verde-pastel); }
+.cam-caja video, .cam-caja canvas { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; transform: scaleX(-1); }
+.cam-estado { position: absolute; left: 8px; top: 8px; padding: 3px 10px; border-radius: 999px;
+  background: rgba(0, 0, 0, .65); color: #fff; font-size: .8rem; font-weight: 700; }
+.cam-estado:empty { display: none; }
+
+/* Barra de "mantén la seña" */
+.cam-retencion { width: 100%; height: 12px; background: var(--verde-pastel); border-radius: 999px; overflow: hidden; }
+.cam-retencion span { display: block; height: 100%; background: var(--esmeralda); border-radius: 999px; transition: width .12s linear; }
+.cam-aviso { min-height: 2.6em; margin: 4px 0 0; font-size: .95rem; font-weight: 600; line-height: 1.35; text-align: center; }
+
+@media (max-width: 560px) {
+  .cam-fila { grid-template-columns: 1fr; }
+  .cam-modelo { grid-template-columns: auto auto; justify-content: center; align-items: center; }
+  .cam-modelo .sena-grande { max-width: 120px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cam-retencion span { transition: none; }
+}

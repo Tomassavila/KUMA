@@ -22,21 +22,6 @@ const MENSAJES = {
 };
 const MENSAJE_BIENVENIDA = MENSAJES.bienvenida[Math.floor(Math.random() * MENSAJES.bienvenida.length)];
 
-// Datos de prueba del perfil (no son reales, luego vendrán de la app)
-const PERFIL_DEMO = {
-  nombre: "Explorador de prueba",
-  nivel: 3, xp: 60, xpMeta: 100,
-  racha: 4, estrellas: 12, leccionesHechas: 1,
-  medallas: [
-    { nombre: "Primer paso", ganada: true },
-    { nombre: "Racha de 3 días", ganada: true },
-    { nombre: "Primera lección", ganada: false },
-    { nombre: "10 estrellas", ganada: true },
-    { nombre: "Explorador", ganada: false },
-    { nombre: "Maestro Kuma", ganada: false }
-  ]
-};
-
 const vista = document.getElementById("vista");
 let leccionesCache = null; // guarda las lecciones para no pedirlas dos veces
 
@@ -87,6 +72,10 @@ function kumaSVG() {
 /* ---------- 2) PANTALLAS ---------- */
 
 function pantallaInicio() {
+  const progreso = leerEstado();
+  const xpMeta = 100;
+  const xpNivel = (progreso.xp || 0) % xpMeta;
+  const nivel = Math.floor((progreso.xp || 0) / xpMeta) + 1;
   return `
   <section class="pantalla inicio">
     <div class="hero-bosque">
@@ -125,23 +114,20 @@ function pantallaInicio() {
     <section class="inicio-inferior">
       <div class="panel-progreso tarjeta">
         <div class="panel-titulo"><span class="icono-panel">${icono("star")}</span><div><p class="sobrelinea">Tu caminito</p><h2>Progreso de exploración</h2></div></div>
-        <p class="nota-demo">Datos de prueba de esta versión</p>
-        <div class="progreso-resumen"><strong>Nivel ${PERFIL_DEMO.nivel}</strong><span>${PERFIL_DEMO.xp} de ${PERFIL_DEMO.xpMeta} XP</span></div>
-        <div class="barra" role="progressbar" aria-label="Experiencia de prueba" aria-valuenow="${PERFIL_DEMO.xp}" aria-valuemin="0" aria-valuemax="${PERFIL_DEMO.xpMeta}"><span style="width:${(PERFIL_DEMO.xp / PERFIL_DEMO.xpMeta) * 100}%"></span></div>
-        <div class="fichas"><div class="ficha"><span class="burbuja-ico b-amarillo">${icono("flame")}</span>Racha: ${PERFIL_DEMO.racha}</div><div class="ficha"><span class="burbuja-ico b-verde">${icono("star")}</span>${PERFIL_DEMO.estrellas} estrellas</div></div>
+        <div class="progreso-resumen"><strong>Nivel ${nivel}</strong><span>${xpNivel} de ${xpMeta} XP</span></div>
+        <div class="barra" role="progressbar" aria-label="Experiencia" aria-valuenow="${xpNivel}" aria-valuemin="0" aria-valuemax="${xpMeta}"><span style="width:${xpNivel}%"></span></div>
+        <div class="fichas"><div class="ficha"><span class="burbuja-ico b-amarillo">${icono("flame")}</span>Racha: ${rachaActual(progreso)}</div><div class="ficha"><span class="burbuja-ico b-verde">${icono("star")}</span>${exContarEstrellas(progreso)} estrellas</div></div>
       </div>
-      <aside class="bienvenida tarjeta">
-        <span class="bienvenida-flor flor" aria-hidden="true"></span><p class="sobrelinea">Un jardín donde cabemos todos</p><h2>Aprender también es incluir</h2>
-        <p>Kuma te acompaña a conocer la LSC y a celebrar distintas maneras de comunicarnos. ¡Gracias por crecer este mundo con nosotros!</p>
-        <a href="#/lecciones" class="enlace-hoja">Conoce las lecciones <span aria-hidden="true">→</span></a>
-      </aside>
+      ${exHtmlLetraDelDia()}
     </section>
   </section>`;
 }
 
 // Tarjeta de una lección (los datos vienen del JSON)
 function tarjetaLeccion(l, indice) {
-  if (l.id === 2) {
+  if (l.id === 1) {
+    l = { ...l, progreso: leerEstado().completadas.length, totalActividades: 10 };
+  } else if (l.id === 2) {
     l = { ...l, progreso: salEstado(leerEstado()).completadas.length, totalActividades: 5 };
   } else if (l.id === 3) {
     l = { ...l, progreso: palEstado(leerEstado()).completadas.length, totalActividades: PAL_LECCIONES.length };
@@ -195,28 +181,31 @@ async function pantallaLecciones() {
 }
 
 function pantallaPerfil() {
-  const p = PERFIL_DEMO;
-  const medallas = p.medallas.map(m =>
-    `<div class="tarjeta medalla ${m.ganada ? "" : "apagada"}">${icono("medal")}${limpiar(m.nombre)}</div>`).join("");
+  const perfil = exDatosPerfil(leerEstado());
   return `
   <section class="pantalla">
     <div class="banner perfil-banner">${icono("user")}<div><h1>Mi rincón</h1><p>Todo lo que has explorado con Kuma</p></div><span class="banner-destello" aria-hidden="true">✦</span></div>
     <div class="perfil-cab">
       <div class="avatar-wrap"><span class="decor flor perfil-flor" aria-hidden="true"></span><span class="decor hoja perfil-hoja" aria-hidden="true"></span><div class="avatar">${kumaSVG()}</div></div>
-      <h1>${limpiar(p.nombre)}</h1>
-      <p class="nota-demo">Perfil y estadísticas de demostración</p>
+      <h1>${limpiar(perfil.nombre)}</h1>
+      <p>Tu camino de aprendizaje en LSC</p>
       <div class="nivel">
-        <small><span>Nivel ${p.nivel}</span><span>${p.xp} / ${p.xpMeta} XP</span></small>
-        <div class="barra"><span style="width:${(p.xp / p.xpMeta) * 100}%"></span></div>
+        <small><span>Nivel ${perfil.nivel}</span><span>${perfil.xp} / 100 XP</span></small>
+        <div class="barra"><span style="width:${perfil.xp}%"></span></div>
       </div>
     </div>
     <div class="estadisticas">
-      <div class="tarjeta c1">${icono("flame")}<strong>${p.racha}</strong><small>Racha</small></div>
-      <div class="tarjeta c2">${icono("star")}<strong>${p.estrellas}</strong><small>Estrellas</small></div>
-      <div class="tarjeta c3">${icono("book")}<strong>${p.leccionesHechas}</strong><small>Lecciones</small></div>
+      <div class="tarjeta c1">${icono("flame")}<strong>${perfil.racha}</strong><small>Racha</small></div>
+      <div class="tarjeta c2">${icono("star")}<strong>${perfil.estrellas}</strong><small>Estrellas</small></div>
+      <div class="tarjeta c3">${icono("book")}<strong>${perfil.lecciones}</strong><small>Lecciones</small></div>
     </div>
     <div class="encabezado-seccion encabezado-medallas"><div><p class="sobrelinea">Pequeños grandes logros</p><h2 class="titulo-seccion">Mis medallas</h2></div><span class="ramita" aria-hidden="true">❧</span></div>
-    <div class="medallas">${medallas}</div>
+    <div class="medallas">${perfil.medallas}</div>
+    <section class="perfil-restablecer" aria-labelledby="restablecer-titulo">
+      <h2 id="restablecer-titulo">¿Quieres empezar de nuevo?</h2>
+      <p>Reinicia las rachas, los puntos, las medallas y el avance de tus lecciones para esta cuenta.</p>
+      <button class="boton-restablecer" type="button" data-reset-progress>Restablecer mi progreso</button>
+    </section>
   </section>`;
 }
 
@@ -235,7 +224,7 @@ function navegar() {
   if (!location.hash) history.replaceState(null, "", "#/inicio");
   // Marca el botón activo del menú
   document.querySelectorAll(".menu a").forEach(a => {
-        const activa = a.dataset.ruta === nombre || (a.dataset.ruta === "lecciones" && ["alfabeto", "leccion", "saludos", "saludo", "palabras", "palabra"].includes(nombre));
+        const activa = a.dataset.ruta === nombre || (a.dataset.ruta === "lecciones" && ["alfabeto", "leccion", "saludos", "saludo", "palabras", "palabra", "camara"].includes(nombre));
     a.classList.toggle("activo", activa);
     if (activa) a.setAttribute("aria-current", "page");
     else a.removeAttribute("aria-current");
@@ -263,6 +252,14 @@ function mostrarAviso(texto) {
 document.addEventListener("click", e => {
   const boton = e.target.closest("[data-aviso]");
   if (boton) mostrarAviso(boton.dataset.aviso);
+});
+
+document.addEventListener("click", e => {
+  const boton = e.target.closest("[data-reset-progress]");
+  if (!boton) return;
+  if (!confirm("¿Borrar el progreso de esta cuenta? Se reiniciarán las rachas, los puntos, las medallas y las lecciones. Esta acción no se puede deshacer.")) return;
+  localStorage.removeItem(KumaAuth.key("kuma_alfabeto_v1"));
+  location.reload();
 });
 
 window.addEventListener("hashchange", navegar);
