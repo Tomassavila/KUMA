@@ -33,7 +33,18 @@ function camEstado(p) {
 }
 async function camDatos() {
   if (!CAMD) {
-    const m = await KumaCam.cargarDatos(CAM_DATOS);
+    let m = await KumaCam.cargarDatos(CAM_DATOS);
+    if (!m.length) {
+      const tarjeta = document.querySelector("#vista .tarjeta");
+      if (tarjeta) tarjeta.textContent = "Preparando el reconocimiento la primera vez. Esto puede tardar unos minutos…";
+      const nuevas = await KumaCam.cargarDatasetLSC70((hechas, total, detectadas) => {
+        const estado = document.querySelector("#vista .tarjeta");
+        if (estado) estado.textContent = `Preparando reconocimiento: ${hechas}/${total} imágenes · ${detectadas} señas detectadas…`;
+      });
+      if (!nuevas.length) throw new Error("No se detectaron manos en las imágenes del dataset.");
+      if (!KumaCam.guardarLocal(nuevas)) throw new Error("El navegador no pudo guardar el dataset. Libera espacio del navegador e inténtalo de nuevo.");
+      m = nuevas;
+    }
     CAMD = { muestras: m, conteo: KumaCam.conteos(m) };
   }
   return CAMD;
@@ -59,7 +70,10 @@ function camLecciones() {
 
 function pantallaCamara() {
   camLimpiar();
-  camDatos().then(() => { if (location.hash === "#/camara") vista.innerHTML = camMapa(); });
+  camDatos().then(() => { if (location.hash === "#/camara") vista.innerHTML = camMapa(); }).catch(error => {
+    console.error("No se pudo preparar el reconocimiento:", error);
+    if (location.hash === "#/camara") vista.innerHTML = `<section class="pantalla alfa"><div class="tarjeta"><h2>No pude preparar el reconocimiento</h2><p>${limpiar(error.message || "Comprueba tu conexión e inténtalo de nuevo.")}</p><button class="boton" onclick="location.reload()">REINTENTAR</button></div></section>`;
+  });
   return `<section class="pantalla"><div class="tarjeta">Cargando práctica con cámara…</div></section>`;
 }
 

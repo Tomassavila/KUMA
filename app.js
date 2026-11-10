@@ -102,6 +102,12 @@ function pantallaInicio() {
       </div>
     </div>
 
+    <a class="acerca-home" href="#/acerca" aria-label="Conoce acerca de Kuma">
+      <span class="acerca-home-icon">${icono("people")}</span>
+      <span class="acerca-home-copy"><strong>Acerca de Kuma</strong><small>Conoce cómo funciona, de dónde vienen las señas y cómo cuidamos tu privacidad.</small></span>
+      <span class="acerca-home-arrow" aria-hidden="true">↗</span>
+    </a>
+
     <section class="accesos" aria-labelledby="accesos-titulo">
       <div class="encabezado-seccion"><div><p class="sobrelinea">Tu aventura empieza aquí</p><h2 id="accesos-titulo">¿Qué exploramos hoy?</h2></div><span class="ramita" aria-hidden="true">❧</span></div>
       <div class="accesos-grid">
@@ -120,6 +126,27 @@ function pantallaInicio() {
       </div>
       ${exHtmlLetraDelDia()}
     </section>
+  </section>`;
+}
+
+function pantallaAcerca() {
+  const equipo = [
+    ["Jhosman Andrey Rueda Ospina", "JOSHRUEDA9@GMAIL.COM"],
+    ["María Alejandra Peña Vargas", "PENAALEJANDRAMA1980@GMAIL.COM"],
+    ["Mateo Rodríguez Peñaranda", "MATEORODRA.ZTE@GMAIL.COM"],
+    ["Tomás Santiago Ávila Rodríguez", "TOMAHSAVILA12@GMAIL.COM"]
+  ];
+  return `
+  <section class="pantalla acerca">
+    <div class="banner">${icono("people")}<div><h1>Acerca de Kuma</h1><p>Una herramienta introductoria para aprender LSC con curiosidad y respeto.</p></div></div>
+    <div class="acerca-nota" role="note"><strong>Aprender también es encontrarnos</strong><p>La app apoya el aprendizaje, no sustituye la interacción con personas sordas ni la validación en LSC.</p></div>
+    <div class="acerca-grid">
+      <article class="tarjeta acerca-card"><span class="acerca-num">01</span><h2>Privacidad de la cámara</h2><p>La cámara solo se activa cuando eliges practicar. El video se procesa en tu dispositivo; Kuma no lo guarda ni lo envía.</p></article>
+      <article class="tarjeta acerca-card"><span class="acerca-num">02</span><h2>¿Qué reconoce Kuma?</h2><p>La práctica con cámara estima algunas poses del alfabeto usando puntos de la mano y ejemplos de referencia. Puede equivocarse; la luz, el encuadre y el movimiento influyen en el resultado.</p><p>El conjunto usado para el alfabeto incluye dos fotogramas por participante. Las señas dinámicas, como J, Z y Ñ, requieren especial validación.</p></article>
+      <article class="tarjeta acerca-card"><span class="acerca-num">03</span><h2>Fuentes de las señas</h2><p>Saludos y Palabras básicas se apoyan en el <em>${SAL_FUENTE}</em>.</p><a class="acerca-enlace" href="${SAL_ENLACE}" target="_blank" rel="noopener noreferrer">Consultar el diccionario de INSOR ↗</a><p class="acerca-fuente-dataset">Para el alfabeto con cámara: LSC70ANH, de Muñoz Galindez, Villota Coral y Vargas-Canas (2024), licencia CC BY 4.0.</p><a class="acerca-enlace" href="https://data.mendeley.com/datasets/9ssyn8tff5/2" target="_blank" rel="noopener noreferrer">Ver la fuente del conjunto LSC70 ↗</a></article>
+      <article class="tarjeta acerca-card acerca-contacto"><span class="acerca-num">04</span><h2>Contacto del proyecto</h2><p>Escribe al equipo creador de Kuma, estudiantes de la Universidad Industrial de Santander:</p><ul>${equipo.map(([nombre, correo]) => `<li><a href="mailto:${correo.toLowerCase()}">${limpiar(nombre)}</a></li>`).join("")}</ul></article>
+    </div>
+    <a class="volver" href="#/inicio">← Volver al inicio</a>
   </section>`;
 }
 
@@ -211,7 +238,7 @@ function pantallaPerfil() {
 
 /* ---------- 3) ROUTER ---------- */
 
-const rutas = { inicio: pantallaInicio, lecciones: pantallaLecciones, perfil: pantallaPerfil };
+const rutas = { inicio: pantallaInicio, lecciones: pantallaLecciones, perfil: pantallaPerfil, acerca: pantallaAcerca };
 
 // Lee la ruta del hash: "#/lecciones" -> "lecciones"
 function ruta() {
@@ -224,7 +251,7 @@ function navegar() {
   if (!location.hash) history.replaceState(null, "", "#/inicio");
   // Marca el botón activo del menú
   document.querySelectorAll(".menu a").forEach(a => {
-        const activa = a.dataset.ruta === nombre || (a.dataset.ruta === "lecciones" && ["alfabeto", "leccion", "saludos", "saludo", "palabras", "palabra", "camara"].includes(nombre));
+        const activa = a.dataset.ruta === nombre || (a.dataset.ruta === "inicio" && nombre === "acerca") || (a.dataset.ruta === "lecciones" && ["alfabeto", "leccion", "saludos", "saludo", "palabras", "palabra", "camara"].includes(nombre));
     a.classList.toggle("activo", activa);
     if (activa) a.setAttribute("aria-current", "page");
     else a.removeAttribute("aria-current");

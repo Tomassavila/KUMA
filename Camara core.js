@@ -57,6 +57,38 @@ const KumaCam = (() => {
     return promesaImagen;
   }
 
+  /* Prepara una vez el dataset incluido en el proyecto y lo deja en el almacenamiento local. */
+  async function cargarDatasetLSC70(progreso) {
+    const indice = await fetch("data/lsc70-alfabeto/manifest.json");
+    if (!indice.ok) throw new Error("No se encontró el dataset LSC70 del proyecto.");
+    const manifiesto = await indice.json();
+    if (!Array.isArray(manifiesto.samples) || !manifiesto.samples.length) {
+      throw new Error("El dataset LSC70 no contiene imágenes.");
+    }
+
+    await cargarModeloImagen();
+    const muestras = [];
+    const lote = 40;
+    for (let inicio = 0; inicio < manifiesto.samples.length; inicio += lote) {
+      const grupo = manifiesto.samples.slice(inicio, inicio + lote);
+      const imagenes = await Promise.all(grupo.map(async muestra => {
+        const ruta = `data/lsc70-alfabeto/${muestra.src.split("/").map(encodeURIComponent).join("/")}`;
+        const respuesta = await fetch(ruta);
+        if (!respuesta.ok) throw new Error(`No se pudo leer ${muestra.src}.`);
+        return { muestra, bitmap: await createImageBitmap(await respuesta.blob()) };
+      }));
+      for (const { muestra, bitmap } of imagenes) {
+        try {
+          const mano = detectarImagen(bitmap);
+          if (mano) muestras.push({ l: muestra.l, f: caracteristicas(mano.puntos, mano.etiqueta, mano.aspecto) });
+        } finally { bitmap.close(); }
+      }
+      if (progreso) progreso(Math.min(inicio + grupo.length, manifiesto.samples.length), manifiesto.samples.length, muestras.length);
+      await new Promise(resolve => setTimeout(resolve, 0));
+    }
+    return muestras;
+  }
+
   /* ----- Cámara ----- */
   async function abrirCamara(video) {
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
@@ -190,6 +222,6 @@ const KumaCam = (() => {
     return c;
   }
 
-  return { RUTAS, cargarModelo, cargarModeloImagen, abrirCamara, cerrarCamara, detectar, detectarImagen, caracteristicas, clasificar,
+  return { RUTAS, cargarModelo, cargarModeloImagen, cargarDatasetLSC70, abrirCamara, cerrarCamara, detectar, detectarImagen, caracteristicas, clasificar,
            dibujar, leerLocal, guardarLocal, cargarDatos, conteos };
 })();

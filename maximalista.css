@@ -1506,6 +1506,43 @@ body:not(.pagina-grabacion) { background: linear-gradient(145deg, #f3f7e9, #e4ef
 .ex-semana { background: linear-gradient(125deg, #e1efd5, #c8dec5 58%, #b3ce9f); }
 .ex-reto-card { background: linear-gradient(125deg, #d8e9cf, #c8dec5 58%, #e9e3b2); }
 .tarjeta { background: linear-gradient(145deg, #fffdf3, #fff 72%); }
+
+/* Acerca de Kuma */
+.acerca-home {
+  display: flex; align-items: center; gap: 16px; width: 100%; padding: 16px 20px;
+  border: 2px solid rgba(0,75,44,.12); border-radius: 24px; background: linear-gradient(120deg, #fffdf3, #e3f0d9);
+  color: var(--texto); text-decoration: none; box-shadow: 0 8px 20px rgba(0,75,44,.09);
+  transition: transform .18s, box-shadow .18s;
+}
+.acerca-home:hover { transform: translateY(-2px); box-shadow: 0 12px 24px rgba(0,75,44,.14); }
+.acerca-home:focus-visible { outline: 4px solid var(--amarillo-osc); outline-offset: 4px; }
+.acerca-home-icon { display: grid; place-items: center; width: 46px; height: 46px; flex: none; border-radius: 16px; background: #dcebd4; color: #006b3f; }
+.acerca-home-icon .ico { width: 25px; height: 25px; }
+.acerca-home-copy { display: grid; gap: 3px; }
+.acerca-home-copy strong { color: #004b2c; font-size: 1.06rem; }
+.acerca-home-copy small { color: #3f5f4b; font-size: .9rem; line-height: 1.4; }
+.acerca-home-arrow { margin-left: auto; color: #006b3f; font-size: 1.45rem; font-weight: 700; }
+.acerca .banner { margin-bottom: 18px; }
+.acerca-nota { margin-bottom: 18px; padding: 18px 20px; border: 2px solid #e4c745; border-radius: 22px; background: linear-gradient(120deg, #fff8d8, #fffdf3); color: #4e461f; }
+.acerca-nota strong { display: block; margin-bottom: 4px; color: #5e4b08; font-size: 1.05rem; }
+.acerca-nota p { line-height: 1.5; }
+.acerca-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.acerca-card { padding: 22px; border-radius: 24px; }
+.acerca-card h2 { margin: 7px 0 8px; color: #004b2c; font-size: 1.2rem; }
+.acerca-card p { margin: 0 0 10px; color: #334f3d; line-height: 1.55; }
+.acerca-num { display: inline-grid; place-items: center; width: 34px; height: 34px; border-radius: 12px; background: #e3f0d9; color: #006b3f; font-weight: 700; }
+.acerca-enlace, .acerca-card li a { color: #005c38; font-weight: 700; text-decoration-thickness: 1px; text-underline-offset: 3px; overflow-wrap: anywhere; }
+.acerca-enlace:focus-visible, .acerca-card li a:focus-visible { outline: 3px solid var(--amarillo-osc); outline-offset: 3px; border-radius: 3px; }
+.acerca-fuente-dataset { margin-top: 15px !important; }
+.acerca-card ul { display: grid; gap: 8px; margin: 6px 0 0; padding-left: 19px; }
+.acerca .volver { display: inline-block; margin-top: 20px; }
+@media (max-width: 620px) {
+  .acerca-home { padding: 14px; gap: 11px; border-radius: 19px; }
+  .acerca-home-icon { width: 40px; height: 40px; }
+  .acerca-home-copy small { font-size: .83rem; }
+  .acerca-grid { grid-template-columns: 1fr; }
+  .acerca-card { padding: 19px; }
+}
 .fc-frente,
 .ex-ldd .fc-frente { background: linear-gradient(145deg, #fff, #f5f7ea); }
 .fc-dorso,
@@ -1794,3 +1831,134 @@ body:not(.pagina-grabacion) { background: linear-gradient(145deg, #f3f8e9 0%, #e
 .ex-semana { background: linear-gradient(135deg, #dcebd4, #b8d69c); }
 .ex-reto-card { background: linear-gradient(135deg, #c5dfb7, #e5ebc3); }
 .tarjeta { background: linear-gradient(145deg, #fffdf3, #fff 72%); }
+
+/* La pantalla Acerca suma detalles de jardín sin competir con su contenido. */
+.acerca {
+  position: relative;
+  isolation: isolate;
+}
+.acerca::before,
+.acerca::after {
+  position: absolute;
+  z-index: 0;
+  content: "";
+  pointer-events: none;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: contain;
+}
+.acerca::before {
+  top: 210px;
+  left: -34px;
+  width: 58px;
+  height: 58px;
+  background-image: url("assets/assets/flor-vector.svg");
+  opacity: .68;
+  transform: rotate(-12deg);
+}
+.acerca::after {
+  right: -17px;
+  bottom: 76px;
+  width: 82px;
+  height: 68px;
+  background-image: url("assets/assets/hojas-vector.svg");
+  opacity: .72;
+  transform: rotate(12deg);
+}
+.acerca > * {
+  position: relative;
+  z-index: 1;
+}
+.acerca .banner {
+  background:
+    radial-gradient(ellipse at 87% 100%, rgba(242,197,0,.2), transparent 34%),
+    linear-gradient(125deg, #004b2c 0%, #006b3f 53%, #4b9b57 100%);
+}
+.acerca .banner::before {
+  top: auto;
+  right: 23%;
+  bottom: -7px;
+  width: 48px;
+  height: 48px;
+  border: 0;
+  border-radius: 0;
+  background: url("assets/assets/flor-vector.svg") center / contain no-repeat;
+  opacity: .72;
+  transform: rotate(14deg);
+}
+.acerca .banner > * {
+  position: relative;
+  z-index: 1;
+}
+.acerca .banner .ico {
+  color: #806600;
+  background: #fff3c4;
+  box-shadow: 0 5px 0 rgba(0,75,44,.2);
+}
+.acerca-nota {
+  position: relative;
+  padding-left: 62px;
+  border-color: #c8d9ad;
+  background: linear-gradient(115deg, #f6f7e4, #fffdf3 74%);
+  color: #36513a;
+}
+.acerca-nota::before {
+  position: absolute;
+  top: 50%;
+  left: 17px;
+  width: 32px;
+  height: 32px;
+  background: url("assets/assets/hojas-vector.svg") center / contain no-repeat;
+  content: "";
+  transform: translateY(-50%);
+}
+.acerca-nota strong { color: #315d3b; }
+.acerca-grid { gap: 17px; }
+.acerca-card {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border-color: rgba(255,255,255,.98);
+  box-shadow: 0 7px 0 rgba(0,75,44,.1), 0 14px 25px rgba(0,75,44,.1);
+}
+.acerca-card::after {
+  position: absolute;
+  z-index: 0;
+  right: 10px;
+  bottom: 8px;
+  width: 34px;
+  height: 34px;
+  background: url("assets/assets/flor-vector.svg") center / contain no-repeat;
+  content: "";
+  opacity: .52;
+  pointer-events: none;
+}
+.acerca-card > * {
+  position: relative;
+  z-index: 1;
+}
+.acerca-card:nth-child(2n) { background: linear-gradient(145deg, #f5f7e8, #fff 72%); }
+.acerca-card:nth-child(2n) .acerca-num { background: #e2edda; }
+.acerca .volver {
+  padding: 9px 16px;
+  border: 2px solid rgba(0,75,44,.12);
+  border-radius: 99px;
+  background: rgba(255,253,243,.88);
+  text-decoration: none;
+  box-shadow: 0 4px 0 rgba(0,75,44,.1);
+  transition: transform .18s, box-shadow .18s;
+}
+.acerca .volver:hover { transform: translateY(-2px); box-shadow: 0 6px 0 rgba(0,75,44,.12); }
+.acerca .volver:focus-visible { outline: 3px solid var(--amarillo-osc); outline-offset: 3px; }
+
+@media (max-width: 620px) {
+  .acerca::before { top: 195px; left: -17px; width: 42px; height: 42px; }
+  .acerca::after { right: -8px; bottom: 58px; width: 62px; height: 52px; }
+  .acerca .banner::before { right: 8%; }
+  .acerca-card::after { right: 7px; bottom: 6px; width: 28px; height: 28px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .acerca .volver { transition: none; }
+  .acerca .volver:hover { transform: none; }
+}

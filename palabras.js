@@ -106,7 +106,7 @@ const PALABRAS = [
   {
     id: "imposible", nombre: "Imposible", tipo: "adj.",
     definicion: "Que no se puede realizar, lograr, conseguir.",
-    variantes: [{ archivo: "Imposible",
+    variantes: [{ archivo: "Imposible", ext: "png",
       como: "Los brazos cruzados formando una equis, con las manos cerradas y las palmas hacia atrás, se mueven simultáneamente hacia afuera, al tiempo que giran hasta quedar con las palmas hacia adelante." }],
     ejemplos: [{ glosa: "PRO1 PROPAGAR COMENTARIO (x2) IMPOSIBLE", texto: "Es imposible que yo propague comentarios." }],
     hueco: "Es ___ que yo propague comentarios."
