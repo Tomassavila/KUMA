@@ -81,7 +81,7 @@
         <p class="auth-switch">${crear ? "¿Ya tienes cuenta?" : "¿Primera vez en Kuma?"}
           <button type="button" data-auth-mode="${crear ? "entrar" : "crear"}">${crear ? "Inicia sesión" : "Crea una cuenta"}</button>
         </p>
-        <small class="auth-local">Las cuentas guardan el avance en este navegador.</small>
+        <small class="auth-local">Las cuentas actuales solo se guardan en este navegador; todavía no se comparten entre dispositivos o navegadores.</small>
       </div>`;
   }
 
@@ -120,7 +120,10 @@
         localStorage.setItem(SESION, user.id);
       } else {
         const user = lista.find(u => u.norm === norm);
-        if (!user || await derivar(password, user.salt) !== user.hash) {
+        if (!user) {
+          ponerMensaje("No encuentro esa cuenta en este navegador. Las cuentas actuales no se comparten entre dispositivos ni navegadores."); return;
+        }
+        if (await derivar(password, user.salt) !== user.hash) {
           ponerMensaje("Usuario o contraseña incorrectos."); return;
         }
         localStorage.setItem(SESION, user.id);
@@ -157,9 +160,8 @@
     enviar(e.target);
   });
 
+  window.KumaAuth = { key: clave, current: usuarioActual };
   const user = usuarioActual();
   if (!user) mostrarPantalla("entrar");
   else dibujarBarraCuenta();
-
-  window.KumaAuth = { key: clave, current: usuarioActual };
 })();
